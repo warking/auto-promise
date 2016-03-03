@@ -1,0 +1,22 @@
+{
+  "name": "auto-promise",
+  "description": "async.auto for promises with result injection",
+  "version": "0.1.0",
+  "author": "Frederik Hannibal <frederik@backhand.dk>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/backhand/auto-promise.git"
+  },
+  "main": "./lib/auto-promise",
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "^2.4.5"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/mocha test  --reporter spec"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=4.0.0"
+  }
+}
