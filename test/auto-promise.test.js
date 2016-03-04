@@ -31,8 +31,8 @@ describe('auto-promise', function() {
 
   it('should run a function map in correct order #2', function(done) {
     auto({
-      op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 150)),
-      op2: op1 => new Promise((resolve, reject) => setTimeout(() => resolve(op1 + ' hov'), 100)),
+      op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 15)),
+      op2: op1 => new Promise((resolve, reject) => setTimeout(() => resolve(op1 + ' hov'), 10)),
       op3: function(op1, op2) {
         return new Promise((resolve, reject) => resolve(op1 + ' ' + op2));
       },
@@ -52,8 +52,8 @@ describe('auto-promise', function() {
 
   it('should run a classic function map in correct order', function(done) {
     auto({
-      op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 150)),
-      op2: ['op1', results => new Promise((resolve, reject) => setTimeout(() => resolve(results.op1 + ' hov'), 100))],
+      op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 15)),
+      op2: ['op1', results => new Promise((resolve, reject) => setTimeout(() => resolve(results.op1 + ' hov'), 10))],
       op3: ['op1', 'op2', function(results) {
         return new Promise((resolve, reject) => resolve(results.op1 + ' ' + results.op2));
       }],
@@ -70,6 +70,24 @@ describe('auto-promise', function() {
       done();
     }).catch(err => {
       console.log('auto-promise.test.js:72 - err', err);
+    });
+  });
+
+  it('should work with node-style callbacks', function(done) {
+    let asyncMethod = function(arg1, callback) {
+      setTimeout(() => callback(null, arg1 + ' hov'), 10);
+    };
+    auto({
+      op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 10)),
+      op2: (op1, callback) => {
+        asyncMethod(op1, callback);
+      }
+    }).then(result => {
+      assert.equal(result.op1, 'hej');
+      assert.equal(result.op2, 'hej hov');
+      done();
+    }).catch(err => {
+      assert.fail(err);
     });
   });
 
