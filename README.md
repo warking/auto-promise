@@ -3,7 +3,7 @@ auto-promise
 
 [![Build Status](https://secure.travis-ci.org/backhand/auto-promise.png?branch=master)](https://travis-ci.org/backhand/auto-promise)
 
-auto-promise is yet another version of the awesome async.auto, but for promises. In contrast to other implementations it can be used in two modes: Injected and classic.
+auto-promise is yet another version of the awesome async.auto, but for promises. In contrast to other implementations it can be used in two modes: Injected and classic. Also, it supports node-style callbacks intermixed.
 
 Installation:
 -------------

@@ -9,24 +9,36 @@ describe('auto-promise', function() {
   // ✓ promise
   // ✓ function returning value
   // ✓ function returning promise
+  // ✓ falsy value
+  // ✓ function returning falsy value
+  // ✓ promise resolving to falsy value
+  // ✓ classic function with dependencies
+  // ✓ classic function with no dependencies
+  // ✓ function(task1, ...) syntax
+  // ✓ (task1, ...) => { expr } syntax
+  // ✓ (task1, ...) => expr syntax
+  // ✓ (results, ...) => { expr } syntax
+  // ✓ (results, ...) => expr syntax
 
   it('should run a function map in correct order #1', function(done) {
     auto({
-      op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 100)),
-      op2: op1 => new Promise((resolve, reject) => setTimeout(() => resolve(op1 + ' hov'), 150)),
+      op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 10)),
+      op2: op1 => new Promise((resolve, reject) => setTimeout(() => resolve(op1 + ' hov'), 15)),
       // Weird formatting intentional :D
       op3: (
         op1 , 
         op2 
        ) => {
         return new Promise((resolve, reject) => resolve(op1 + ' ' + op2));
-      }
+      },
+      op4: () => false
     }).then(result => {
       assert.equal(result.op1, 'hej');
       assert.equal(result.op2, 'hej hov');
       assert.equal(result.op3, 'hej hej hov');
+      assert.equal(result.op4, false);
       done();
-    });
+    }).catch(done);
   });
 
   it('should run a function map in correct order #2', function(done) {
@@ -39,15 +51,25 @@ describe('auto-promise', function() {
       op5: function hejsa(op3, op4) {
         return op4 + ' yolo ' + op3;
       },
-      op4: 'sup'
+      op4: 'sup',
+      op6(op4) {
+        return 'hi ' + op4;
+      },
+      op7: (op4) => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => resolve(), 10);
+        });
+      }
     }).then(result => {
       assert.equal(result.op1, 'hej');
       assert.equal(result.op2, 'hej hov');
       assert.equal(result.op3, 'hej hej hov');
       assert.equal(result.op4, 'sup');
       assert.equal(result.op5, 'sup yolo hej hej hov');
+      assert.equal(result.op6, 'hi sup');
+      assert.equal(result.op7, null);
       done();
-    });
+    }).catch(done);
   });
 
   it('should run a classic function map in correct order', function(done) {
@@ -60,17 +82,17 @@ describe('auto-promise', function() {
       op5: function hejsa(op3, op4) {
         return op4 + ' yolo ' + op3;
       },
-      op4: 'sup'
+      op4: 'sup',
+      op6: false
     }).then(result => {
       assert.equal(result.op1, 'hej');
       assert.equal(result.op2, 'hej hov');
       assert.equal(result.op3, 'hej hej hov');
       assert.equal(result.op4, 'sup');
       assert.equal(result.op5, 'sup yolo hej hej hov');
+      assert.equal(result.op6, false);
       done();
-    }).catch(err => {
-      console.log('auto-promise.test.js:72 - err', err);
-    });
+    }).catch(done);
   });
 
   it('should work with node-style callbacks', function(done) {
@@ -81,13 +103,37 @@ describe('auto-promise', function() {
       op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 10)),
       op2: (op1, callback) => {
         asyncMethod(op1, callback);
-      }
+      },
+      op3: [function(results, callback) {
+        asyncMethod('hovsa', callback);
+      }],
+      op4: ['op2', function(results, callback) {
+        asyncMethod('hovsa' + results.op3, callback);
+      }]
     }).then(result => {
       assert.equal(result.op1, 'hej');
       assert.equal(result.op2, 'hej hov');
+      assert.equal(result.op3, 'hovsa hov');
+      assert.equal(result.op4, 'hovsahovsa hov hov');
       done();
+    }).catch(done);
+  });
+
+  it('should catch exceptions in node-style callback', function(done) {
+    let asyncMethod = function(arg1, callback) {
+      setTimeout(() => callback(null, arg1 + ' hov'), 10);
+    };
+    auto({
+      op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 10)),
+      op2: (op1, callback) => {
+        throw new Error('>:(');
+      }
+    }).then(result => {
+      return done(new Error('Fail'));
     }).catch(err => {
-      assert.fail(err);
+      assert.ok(err);
+      assert.equal(err, 'Error: >:(');
+      done();
     });
   });
 
