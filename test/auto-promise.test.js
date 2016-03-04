@@ -9,6 +9,7 @@ describe('auto-promise', function() {
   // ✓ promise
   // ✓ function returning value
   // ✓ function returning promise
+  // ✓ function with no arguments
   // ✓ falsy value
   // ✓ function returning falsy value
   // ✓ promise resolving to falsy value
