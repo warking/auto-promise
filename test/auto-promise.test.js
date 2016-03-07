@@ -16,6 +16,8 @@ describe('auto-promise', function() {
   // ✓ classic function with dependencies
   // ✓ classic function with no dependencies
   // - Callback function errors
+  // - Callback as second parameter for complete drop-in compatibility
+  // - Collapse multiple callback values into one array (callback(err, value1, value2) => [value1, value2])
   // ✓ function(task1, ...) syntax
   // ✓ (task1, ...) => { expr } syntax
   // ✓ (task1, ...) => expr syntax
@@ -28,11 +30,11 @@ describe('auto-promise', function() {
       op2: op1 => new Promise((resolve, reject) => setTimeout(() => resolve(op1 + ' hov'), 15)),
       // Weird formatting intentional :D
       op3: (
-        op1 , 
-        op2 
+        op1 ,
+        op2
        ) => {
-        return new Promise((resolve, reject) => resolve(op1 + ' ' + op2));
-      },
+         return new Promise((resolve, reject) => resolve(op1 + ' ' + op2));
+       },
       op4: () => false
     }).then(result => {
       assert.equal(result.op1, 'hej');
