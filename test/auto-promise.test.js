@@ -123,6 +123,23 @@ describe('auto-promise', function() {
     }).catch(done);
   });
 
+  it('should collapse multiple result arguments to callback into array', function(done) {
+    let asyncMethod = function(arg1, callback) {
+      setTimeout(() => callback(null, arg1 + ' hov', 'hej'), 10);
+    };
+    auto({
+      op1: new Promise((resolve, reject) => setTimeout(() => resolve('hej'), 10)),
+      op2: ['op1', (callback, results) => {
+        asyncMethod(results.op1, callback);
+      }]
+    }).then(result => {
+      assert.equal(result.op1, 'hej');
+      assert.deepEqual(result.op2, ['hej hov', 'hej']);
+
+      done();
+    }).catch(done);
+  });
+
   it('should catch exceptions in node-style callback', function(done) {
     let asyncMethod = function(arg1, callback) {
       setTimeout(() => callback(null, arg1 + ' hov'), 10);
