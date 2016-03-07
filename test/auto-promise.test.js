@@ -15,6 +15,7 @@ describe('auto-promise', function() {
   // ✓ promise resolving to falsy value
   // ✓ classic function with dependencies
   // ✓ classic function with no dependencies
+  // - Callback function errors
   // ✓ function(task1, ...) syntax
   // ✓ (task1, ...) => { expr } syntax
   // ✓ (task1, ...) => expr syntax
@@ -105,10 +106,10 @@ describe('auto-promise', function() {
       op2: (op1, callback) => {
         asyncMethod(op1, callback);
       },
-      op3: [function(results, callback) {
+      op3: [function(callback, results) {
         asyncMethod('hovsa', callback);
       }],
-      op4: ['op2', function(results, callback) {
+      op4: ['op2', function(callback, results) {
         asyncMethod('hovsa' + results.op3, callback);
       }]
     }).then(result => {
@@ -145,7 +146,7 @@ describe('auto-promise', function() {
     });
   });
 
-  it('should throw an error on circular dependencies', function(done) {
+  it('should throw an error on self-referencing dependencies', function(done) {
     auto({
       op1: 'hej',
       op2: op2 => 'hov'
@@ -157,7 +158,26 @@ describe('auto-promise', function() {
       assert.equal(err, 'Error: Circular dependency for op2');
       done();
     });
+  });
 
+  it('should throw an error on circular dependencies', function(done) {
+    auto({
+      op1: (op2) => {
+        return 'hi';
+      },
+      op2: (op3) => {
+        return 'ho';
+      },
+      op3: (op1) => {
+        return 'hi ho';
+      }
+    }).then(result => {
+      assert.fail('Not supposed to be here');
+      done();
+    }).catch(err => {
+      assert.equal(err, 'Error: Unresolvable dependencies: op1, op2, op3');
+      done();
+    });
   });
 
   it('should throw an error on undefined dependencies', function(done) {
