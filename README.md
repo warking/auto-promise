@@ -1,7 +1,7 @@
 auto-promise
 ============
-
 [![Build Status](https://secure.travis-ci.org/backhand/auto-promise.png?branch=master)](https://travis-ci.org/backhand/auto-promise)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/0b4b16d43ce947158b207519b00500ba)](https://www.codacy.com/app/frederik/auto-promise?utm_source=github.com&utm_medium=referral&utm_content=backhand/auto-promise&utm_campaign=Badge_Coverage)
 
 auto-promise is yet another version of the awesome async.auto, but for promises. In contrast to other implementations it can be used in two modes: Injected and classic. Also, it supports node-style callbacks intermixed.
 
